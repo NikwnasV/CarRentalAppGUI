@@ -4,6 +4,9 @@
  */
 package Model;
 
+import DatabaseConfig.Database;
+import java.util.Scanner;
+
 /**
  *
  * @author nikwn
@@ -15,7 +18,7 @@ public class Client extends User {
     }
     
     @Override
-    public void showList() {
+    public void showList(Database database, Scanner sc) {
         System.out.println("\n1. View Cars");
         System.out.println("2. Rent Car");
         System.out.println("3. Return Car");

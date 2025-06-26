@@ -4,6 +4,9 @@
  */
 package Model;
 
+import DatabaseConfig.Database;
+import java.util.Scanner;
+
 /**
  *
  * @author nikwn
@@ -15,6 +18,11 @@ public abstract class User {
     private String email;
     private String phoneNumber;
     private String password;
+    
+    //Role : 0 ==> Client
+    //       1 ==> Admin
+    //       2 ==> DeletedClientAccount
+    //       3 ==> DeletedAdminAccount
 
     public User() {
     }
@@ -67,5 +75,5 @@ public abstract class User {
         this.password = password;
     }
     
-    public abstract void showList();
+    public abstract void showList(Database database, Scanner sc);
 }

@@ -2,12 +2,18 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
  */
-package Controller;
+package Model;
+
+import DatabaseConfig.Database;
+import Model.User;
+import java.util.Scanner;
 
 /**
  *
  * @author nikwn
  */
 public interface Operation {
+    
+    public void operation(Database dbconfig, Scanner s, User user);
     
 }
