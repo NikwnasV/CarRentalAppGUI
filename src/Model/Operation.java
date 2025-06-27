@@ -5,7 +5,6 @@
 package Model;
 
 import DatabaseConfig.Database;
-import Model.User;
 import java.util.Scanner;
 
 /**

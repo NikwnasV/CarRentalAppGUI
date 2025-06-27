@@ -4,6 +4,7 @@ import Model.Admin;
 import DatabaseConfig.Database;
 import Model.Client;
 import Model.User;
+import Utils.SecurityUtil;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,10 +25,10 @@ public class CarRentalApp {
         
         ArrayList<User> users = new ArrayList<>();
         try {
-            //String hashedPassword = database.hashPassword(password);
+            String hashedPassword = SecurityUtil.hashPassword(password);
             PreparedStatement pr = database.getConnection().prepareStatement("SELECT * FROM users WHERE email = ? AND password = ?");
             pr.setString(1, email);
-            pr.setString(2, password);
+            pr.setString(2, hashedPassword);
             ResultSet rs = pr.executeQuery();
             while (rs.next()) {
                 User user;
@@ -37,7 +38,6 @@ public class CarRentalApp {
                 String em = (rs.getString("email"));
                 String phoneNumber = (rs.getString("phoneNumber"));
                 String passwd = (rs.getString("password"));
-                //passwd = database.hashPassword(passwd);
                 int role = (rs.getInt("role")); 
                 switch(role) {
                     case 0:
@@ -62,14 +62,12 @@ public class CarRentalApp {
             e.printStackTrace();
         }
         for(User u : users){
-            if(u.getEmail().equals(email) && u.getPassword().equals(password)){
+            if(u.getEmail().equals(email) && u.getPassword().equals(SecurityUtil.hashPassword(password))){
                 System.out.println("Welcome " + u.getFirstName()+ " !");
                 u.showList(database, sc);
             }
         
         }
-        //admin.showList(database, sc);
-
         sc.close();
     }
 }

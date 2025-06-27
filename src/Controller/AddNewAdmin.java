@@ -7,8 +7,7 @@ package Controller;
 import DatabaseConfig.Database;
 import Model.Operation;
 import Model.User;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import Utils.SecurityUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -51,7 +50,7 @@ public class AddNewAdmin implements Operation {
             ID = rs.getInt("COUNT(*)")-1;
             pr = connection.prepareStatement("insert into users "
                     + "(ID, firstName, lastName, email, phoneNumber, password, role) VALUES (?, ?, ?, ?)");
-            String hashedPassword = database.hashPassword(password);
+            String hashedPassword = SecurityUtil.hashPassword(password);
             pr.setInt(1, ID);
             pr.setString(2, firstName);
             pr.setString(3, lastName);
