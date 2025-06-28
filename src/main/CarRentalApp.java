@@ -1,5 +1,6 @@
 package main;
 
+import Controller.AddNewAccount;
 import Model.Admin;
 import DatabaseConfig.Database;
 import Model.Client;
@@ -20,6 +21,10 @@ public class CarRentalApp {
         System.out.println("Welcome to Car Rental App");
         System.out.println("Enter your email:\n (-1) to create new account");
         String email = sc.next();
+        if(email.equals("-1")){
+            new AddNewAccount(0).operation(database, sc, null);
+            return;
+        }
         System.out.println("Enter Password:");
         String password = sc.next();
         

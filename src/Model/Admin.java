@@ -4,7 +4,11 @@
  */
 package Model;
 
-import Controller.AddNewAdmin;
+import Controller.AddNewAccount;
+import Controller.AddNewCar;
+import Controller.DeleteCar;
+import Controller.UpdateCar;
+import Controller.ViewCars;
 import DatabaseConfig.Database;
 import java.util.Scanner;
 
@@ -14,7 +18,7 @@ import java.util.Scanner;
  */
 public class Admin extends User {
     
-    private Operation[] operations = new Operation[] {new AddNewAdmin()};
+    private Operation[] operations = new Operation[] {new AddNewCar(), new ViewCars(), new UpdateCar(), new DeleteCar(), new AddNewAccount(2)};
     public Admin() {
         super();
     }
@@ -31,7 +35,7 @@ public class Admin extends User {
         System.out.println("0. Quit\n");
         
         int i = sc.nextInt();
-        operations[i].operation(database, sc, this);
+        operations[i-1].operation(database, sc, this);
     }
     
 }

@@ -17,9 +17,9 @@ public class Car {
     private String gearbox;
     private int enginecc;
     private int horsepower;
-    private double consumption;
-    private double price;
-    private boolean available;
+    private float consumption;
+    private float price;
+    private int available;
     private String imgPath; 
 
     public Car() {
@@ -89,27 +89,27 @@ public class Car {
         this.horsepower = horsepower;
     }
 
-    public double getConsumption() {
+    public float getConsumption() {
         return consumption;
     }
 
-    public void setConsumption(double consumption) {
+    public void setConsumption(float consumption) {
         this.consumption = consumption;
     }
 
-    public double getPrice() {
+    public float getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(float price) {
         this.price = price;
     }
 
-    public boolean isAvailable() {
+    public int getAvailable() {
         return available;
     }
 
-    public void setAvailable(boolean available) {
+    public void setAvailable(int available) {
         this.available = available;
     }
 
