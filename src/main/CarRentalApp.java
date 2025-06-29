@@ -52,8 +52,8 @@ public class CarRentalApp {
                         user = new Admin();
                         break;
                     default:
-                        user = new Client();
-                        break;
+                        System.out.println("Account doesn't exist!\n");
+                        return;
                 }
                 user.setID(ID);
                 user.setFirstName(firstName);

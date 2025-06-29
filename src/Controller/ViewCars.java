@@ -62,8 +62,8 @@ public class ViewCars implements Operation {
             System.out.printf("%-25s %s\n", "Gearbox:", c.getGearbox());
             System.out.printf("%-25s %d\n", "Engine CC:", c.getEnginecc());
             System.out.printf("%-25s %d\n", "Horsepower:", c.getHorsepower());
-            System.out.printf("%-25s %.2f\n", "Consumption (l/100km):", c.getConsumption());
-            System.out.printf("%-25s %.2f\n", "Price per Day:", c.getPrice());
+            System.out.printf("%-25s %.1f\n", "Consumption (l/100km):", c.getConsumption());
+            System.out.printf("%-25s %.1f\n", "Price per Day (\u20ac):", c.getPrice()); // \u20ac = euro sign
             String status = (c.getAvailable() > 0) ? GREEN + "Available" + RESET : RED + "Unavailable" + RESET;
             System.out.printf("%-25s %s\n", "Status:", status);
             System.out.println("--------------------------------------------------");

@@ -13,6 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Scanner;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 /**
  *
@@ -20,10 +21,10 @@ import java.sql.SQLException;
  */
 public class AddNewAccount implements Operation {
     
-    private int accType;
+    private int accRole;
     
     public AddNewAccount(int accType) {
-        this.accType = accType;
+        this.accRole = accRole;
     }
     
     @Override
@@ -47,10 +48,20 @@ public class AddNewAccount implements Operation {
             System.out.println("Confirm Password: ");
             confirmPassword = sc.next();
         }
-        int role = accType;
+        int role = accRole;
         Connection connection = database.getConnection();
         try {
-            PreparedStatement pr = connection.prepareStatement("SELECT COUNT(*) AS count FROM users;");
+            ArrayList<String> emails = new ArrayList<>();
+            PreparedStatement pr = connection.prepareStatement("SELECT 'email' FROM users;");
+            ResultSet rs0 = pr.executeQuery();
+            while(rs0.next()){
+                emails.add(rs0.getString("Email"));
+            }
+            if(emails.contains(email)) {
+                System.out.println("An account with this email already exists !");
+                return;
+            }
+            pr = connection.prepareStatement("SELECT COUNT(*) AS count FROM users;");
             ResultSet rs = pr.executeQuery();
     
             int ID = 1;
