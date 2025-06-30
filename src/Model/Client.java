@@ -4,6 +4,7 @@
  */
 package Model;
 
+import Controller.RentCar;
 import Controller.ViewCars;
 import DatabaseConfig.Database;
 import java.util.Scanner;
@@ -14,7 +15,7 @@ import java.util.Scanner;
  */
 public class Client extends User {
     
-    private final Operation[] operations = new Operation[] {new ViewCars()};
+    private final Operation[] operations = new Operation[] {new ViewCars(), new RentCar()};
     public Client() {
         super();
     }

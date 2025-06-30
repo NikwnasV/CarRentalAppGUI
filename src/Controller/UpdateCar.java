@@ -85,7 +85,7 @@ public class UpdateCar implements Operation {
             float consumption = inputConsumption.equals("-1") ? car.getConsumption() : Float.parseFloat(inputConsumption);
             System.out.println("Enter Price (-1 to keep: " + car.getPrice() + "): ");
             float price = s.nextFloat();
-            if (price == -1) price = car.getPrice();
+            if (price <= 0) price = car.getPrice();
             System.out.println("Enter Available count (-1 to keep: " + car.getAvailable() + "): ");
             int available = s.nextInt();
             if (available == -1) available = car.getAvailable();

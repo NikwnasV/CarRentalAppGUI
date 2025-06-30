@@ -35,6 +35,10 @@ public class AddNewAccount implements Operation {
         String lastName = sc.next();
         System.out.println("Enter Email: ");
         String email = sc.next();
+        while (!email.contains("@")) {
+            System.out.println("Please enter a valid email address!:");
+            email = sc.next();
+        }
         System.out.println("Enter Phone Number: ");
         String phoneNumber = sc.next();
         System.out.println("Enter Password: ");
@@ -52,7 +56,7 @@ public class AddNewAccount implements Operation {
         Connection connection = database.getConnection();
         try {
             ArrayList<String> emails = new ArrayList<>();
-            PreparedStatement pr = connection.prepareStatement("SELECT 'email' FROM users;");
+            PreparedStatement pr = connection.prepareStatement("SELECT email FROM users;");
             ResultSet rs0 = pr.executeQuery();
             while(rs0.next()){
                 emails.add(rs0.getString("Email"));
