@@ -69,6 +69,7 @@ public class RentCar implements Operation {
                 if (rs.next()) {
                     ID = rs.getInt("count")+1;  // count will be 0 if table is empty
                 }
+                
                 float total = car.getPrice()*days;
                 System.out.println("Total Price : " +total+"€");
                 System.out.println("Days of Renting: " +days);
