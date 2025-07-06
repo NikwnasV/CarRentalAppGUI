@@ -23,10 +23,10 @@ import Model.Car;
  */
 public class ViewCars implements Operation {
     
-            public static final String GREEN = "\u001B[32m";
-        public static final String RED = "\u001B[31m";
-        public static final String RESET = "\u001B[0m";
-    ArrayList<Car> cars = new ArrayList<>();
+    public static final String GREEN = "\u001B[32m";
+    public static final String RED = "\u001B[31m";
+    public static final String RESET = "\u001B[0m";
+    public static final String BLUE = "\u001B[34m";
     
     @Override
     public void operation(Database database, Scanner s, User user){
@@ -35,6 +35,7 @@ public class ViewCars implements Operation {
         try{
             PreparedStatement pr = connection.prepareStatement("SELECT * FROM cars;");
             ResultSet rs = pr.executeQuery();
+            ArrayList<Car> cars = new ArrayList<>();
             while(rs.next()){
                 Car car = new Car();
                 car.setID(rs.getInt("ID"));
@@ -50,24 +51,25 @@ public class ViewCars implements Operation {
                 car.setAvailable(rs.getInt("Available"));
                 cars.add(car);
             }
+
+            for (Car c : cars) {
+                System.out.printf("%-25s %s\n", "ID:", c.getID());
+                System.out.printf("%-25s %s\n", "Brand:", c.getBrand());
+                System.out.printf("%-25s %s\n", "Model:", c.getModel());
+                System.out.printf("%-25s %s\n", "Year:", c.getYear());
+                System.out.printf("%-25s %s\n", "Fuel Type:", c.getFuel());
+                System.out.printf("%-25s %s\n", "Gearbox:", c.getGearbox());
+                System.out.printf("%-25s %d\n", "Engine CC:", c.getEnginecc());
+                System.out.printf("%-25s %d\n", "Horsepower:", c.getHorsepower());
+                System.out.printf("%-25s %.1f\n", "Consumption (l/100km):", c.getConsumption());
+                System.out.printf("%-25s %.1f\n", "Price per Day (\u20ac):", c.getPrice()); // \u20ac = euro sign
+                String status = (c.getAvailable() > 0) ? GREEN + "Available" + RESET : RED + "Unavailable" + RESET;
+                System.out.printf("%-25s %s\n", "Status:", status);
+                System.out.println("--------------------------------------------------");
+            }
+            System.out.println("----------------------\n");
         }catch(SQLException e){
             e.printStackTrace();
         }
-        for (Car c : cars) {
-            System.out.printf("%-25s %s\n", "ID:", c.getID());
-            System.out.printf("%-25s %s\n", "Brand:", c.getBrand());
-            System.out.printf("%-25s %s\n", "Model:", c.getModel());
-            System.out.printf("%-25s %s\n", "Year:", c.getYear());
-            System.out.printf("%-25s %s\n", "Fuel Type:", c.getFuel());
-            System.out.printf("%-25s %s\n", "Gearbox:", c.getGearbox());
-            System.out.printf("%-25s %d\n", "Engine CC:", c.getEnginecc());
-            System.out.printf("%-25s %d\n", "Horsepower:", c.getHorsepower());
-            System.out.printf("%-25s %.1f\n", "Consumption (l/100km):", c.getConsumption());
-            System.out.printf("%-25s %.1f\n", "Price per Day (\u20ac):", c.getPrice()); // \u20ac = euro sign
-            String status = (c.getAvailable() > 0) ? GREEN + "Available" + RESET : RED + "Unavailable" + RESET;
-            System.out.printf("%-25s %s\n", "Status:", status);
-            System.out.println("--------------------------------------------------");
-        }
-        System.out.println("----------------------\n");
     }
 }

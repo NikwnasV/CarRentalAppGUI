@@ -7,6 +7,7 @@ package Model;
 import Controller.AddNewAccount;
 import Controller.AddNewCar;
 import Controller.DeleteCar;
+import Controller.ShowRents;
 import Controller.UpdateCar;
 import Controller.ViewCars;
 import DatabaseConfig.Database;
@@ -18,7 +19,14 @@ import java.util.Scanner;
  */
 public class Admin extends User {
     
-    private Operation[] operations = new Operation[] {new AddNewCar(), new ViewCars(), new UpdateCar(), new DeleteCar(), new AddNewAccount(1)};
+    private Operation[] operations = new Operation[] {
+        new AddNewCar(), 
+        new ViewCars(), 
+        new UpdateCar(), 
+        new DeleteCar(), 
+        new AddNewAccount(1),
+        new ShowRents()};
+    
     public Admin() {
         super();
     }

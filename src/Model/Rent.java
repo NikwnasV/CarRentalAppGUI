@@ -16,10 +16,16 @@ public class Rent {
     private User user;
     private Car car;
     private LocalDateTime dateTime;
-    private int hours;
+    private int days;
     private double total;
-    private String status;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm");
+    private int status;
+
+    /*
+        Status => 0 Running
+               => 1 Returned
+    */
+             
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
     
     public Rent() {
         dateTime = LocalDateTime.now();
@@ -57,12 +63,12 @@ public class Rent {
         this.dateTime = LocalDateTime.parse(dateTimeString, formatter);
     }
 
-    public int getHours() {
-        return hours;
+    public int getDays() {
+        return days;
     }
 
-    public void setHours(int hours) {
-        this.hours = hours;
+    public void setDays(int days) {
+        this.days = days;
     }
 
     public double getTotal() {
@@ -72,12 +78,17 @@ public class Rent {
     public void setTotal(double total) {
         this.total = total;
     }
-
-    public String getStatus() {
+    
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
-    }    
+    }
+    
+    public LocalDateTime getRawDateTime() {
+        return dateTime;
+    }
+
 }
