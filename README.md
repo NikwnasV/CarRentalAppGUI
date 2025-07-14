@@ -1,28 +1,40 @@
-*This is a dummy app for a Car Rental Business*
+🚗 Car Rental System (Dummy App)
+This is a dummy desktop application simulating a basic Car Rental Business, built primarily for educational and demonstration purposes.
 
-It implements the use cases listed below : 
+✅ Features Implemented
+👤 Admin Use Cases
+🔐 Login / Logout
 
-Admin Use Cases :
-Login/Logout
+📋 View All Cars
 
-Menu:
+➕ Add New Car
 
-View All Cars
-Add New Car
-Update Car
-Delete Car
-Add New Admin
-Show User's Rents (not yet implemented)
-Show Stats (not yet implemented)
+✏️ Update Car
 
-Client Use Cases :
-Login/Logout
-Register
+❌ Delete Car
 
-Menu:
+👥 Add New Admin
 
-View All Cars (Available and Unavailable Cars show in a list format along side their details)
-Rent A Car (Choosing a car from the dropdown menu allows the Client to see a picture of the car along side each details, then Client enters the number of days)
-Return Car
-Show My Rents
-Edit My Data (not yet implemented)
+📄 Show User's Rents (not yet implemented)
+
+📊 Show Stats (not yet implemented)
+
+👥 Client Use Cases
+🔐 Login / Logout
+
+📝 Register
+
+📋 View All Cars
+
+Available and unavailable cars are shown in a list format alongside their full details.
+
+🚘 Rent a Car
+
+Choose a car from a dropdown. A picture and all details of the car are displayed.
+The client specifies the number of rental days and confirms the transaction.
+
+↩️ Return a Car
+
+📜 Show My Rents
+
+⚙️ Edit My Data (not yet implemented)
