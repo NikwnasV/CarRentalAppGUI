@@ -1,4 +1,4 @@
-This is a dummy app for a Car Rental Business
+*This is a dummy app for a Car Rental Business*
 
 It implements the use cases listed below : 
 
