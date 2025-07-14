@@ -1,40 +1,40 @@
-🚗 Car Rental System (Dummy App)
-This is a dummy desktop application simulating a basic Car Rental Business, built primarily for educational and demonstration purposes.
+# 🚗 Car Rental Management System (Dummy App)
 
-✅ Features Implemented
-👤 Admin Use Cases
-🔐 Login / Logout
+This is a **dummy desktop application** for a Car Rental Business written in Java (Swing). It supports both **Admin** and **Client** functionalities.
 
-📋 View All Cars
+---
 
-➕ Add New Car
+## 🔐 Admin Use Cases
 
-✏️ Update Car
+- ✅ **Login / Logout**
 
-❌ Delete Car
+### 📋 Admin Menu
 
-👥 Add New Admin
+- 👀 View All Cars  
+- ➕ Add New Car  
+- ✏️ Update Car  
+- ❌ Delete Car  
+- 👤 Add New Admin  
+- 📄 Show User's Rents *(🚧 Not yet implemented)*  
+- 📊 Show Stats *(🚧 Not yet implemented)*  
 
-📄 Show User's Rents (not yet implemented)
+---
 
-📊 Show Stats (not yet implemented)
+## 🙋‍♂️ Client Use Cases
 
-👥 Client Use Cases
-🔐 Login / Logout
+- ✅ **Login / Logout**  
+- 📝 **Register**  
 
-📝 Register
+### 📋 Client Menu
 
-📋 View All Cars
+- 👀 View All Cars  
+  > 🧾 Displays both available and unavailable cars along with their details in a list format.  
 
-Available and unavailable cars are shown in a list format alongside their full details.
+- 🚘 Rent a Car  
+  > 🔽 Choose a car from a dropdown and preview its 🖼️ image + details. Then enter rental duration (in days).  
 
-🚘 Rent a Car
+- 🔙 Return Car  
+- 📅 Show My Rents  
+- 🧑‍🔧 Edit My Data *(🚧 Not yet implemented)*
 
-Choose a car from a dropdown. A picture and all details of the car are displayed.
-The client specifies the number of rental days and confirms the transaction.
-
-↩️ Return a Car
-
-📜 Show My Rents
-
-⚙️ Edit My Data (not yet implemented)
+---
