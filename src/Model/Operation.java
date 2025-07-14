@@ -13,6 +13,6 @@ import java.util.Scanner;
  */
 public interface Operation {
     
-    public void operation(Database dbconfig, Scanner s, User user);
+    public void operation(Database dbconfig, Scanner sc, User user);
     
 }

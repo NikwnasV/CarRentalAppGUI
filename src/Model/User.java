@@ -4,9 +4,6 @@
  */
 package Model;
 
-import DatabaseConfig.Database;
-import java.util.Scanner;
-
 /**
  *
  * @author nikwn
@@ -74,6 +71,4 @@ public abstract class User {
     public void setPassword(String password) {
         this.password = password;
     }
-    
-    public abstract void showList(Database database, Scanner sc);
 }

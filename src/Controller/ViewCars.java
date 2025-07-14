@@ -4,7 +4,6 @@
  */
 package Controller;
 
-import java.util.Scanner;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -16,6 +15,8 @@ import DatabaseConfig.Database;
 import Model.Operation;
 import Model.User;
 import Model.Car;
+import java.awt.Component;
+import java.util.Scanner;
 
 /**
  *
@@ -29,7 +30,7 @@ public class ViewCars implements Operation {
     public static final String BLUE = "\u001B[34m";
     
     @Override
-    public void operation(Database database, Scanner s, User user){
+    public void operation(Database database, Scanner f, User user){
         Connection connection = database.getConnection();
         System.out.println();
         try{

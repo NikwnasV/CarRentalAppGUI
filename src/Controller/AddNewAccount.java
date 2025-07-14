@@ -8,6 +8,7 @@ import DatabaseConfig.Database;
 import Model.Operation;
 import Model.User;
 import Utils.SecurityUtil;
+import java.awt.Component;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -88,5 +89,4 @@ public class AddNewAccount implements Operation {
             e.printStackTrace();
         }
     }
-
 }
