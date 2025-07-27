@@ -1,0 +1,1 @@
+jpackage --input dist --name CarRental --main-jar CarRentalApp.jar --type app-image --icon dist/logo2.ico

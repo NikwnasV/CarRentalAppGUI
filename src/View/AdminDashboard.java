@@ -46,7 +46,7 @@ public class AdminDashboard extends JFrame {
         JButton deleteCar = new JButton("Delete Car");
         JButton addAdmin = new JButton("Add New Admin");
         JButton showRents = new JButton("Show Rents");
-        JButton showStats = new JButton("Show Stats (coming soon)");
+        JButton showStats = new JButton("Show Stats");
         JButton logout = new JButton("Logout");
 
         // Add buttons to panel
@@ -67,7 +67,8 @@ public class AdminDashboard extends JFrame {
         updateCar.addActionListener(e -> new UpdateCarGUI(new Database()));
         deleteCar.addActionListener(e -> new DeleteCarGUI(new Database()));
         addAdmin.addActionListener(e -> new AddNewAccountGUI(new Database(), 1));
-        //showRents.addActionListener(e -> operations[5].operation(database, this, admin));
+        showRents.addActionListener(e -> new ShowRentsGUI(new Database()));
+        showStats.addActionListener(e -> new AdminStatsGUI(new Database()));
 
         logout.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to logout?", "Logout", JOptionPane.YES_NO_OPTION);

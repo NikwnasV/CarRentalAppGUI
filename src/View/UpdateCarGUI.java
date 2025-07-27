@@ -6,10 +6,13 @@ package View;
 
 import DatabaseConfig.Database;
 import Model.Car;
+import Utils.ImageUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.util.HashMap;
 
@@ -17,7 +20,6 @@ import java.util.HashMap;
  *
  * @author nikwn
  */
-
 public class UpdateCarGUI extends JFrame {
     private final Database database;
     private final JComboBox<String> carIdCombo;
@@ -33,27 +35,26 @@ public class UpdateCarGUI extends JFrame {
     private final JTextField consumptionField = new JTextField();
     private final JTextField priceField = new JTextField();
     private final JTextField availableField = new JTextField();
+    private final JTextField imagePathField = new JTextField();
+    private File selectedImageFile = null;
 
     public UpdateCarGUI(Database database) {
         this.database = database;
 
         setTitle("Update Car");
-        setSize(500, 600);
+        setSize(500, 650);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        JPanel form = new JPanel();
-        form.setLayout(new GridLayout(12, 2, 10, 10));
+        JPanel form = new JPanel(new GridLayout(14, 2, 10, 10));
         form.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
         carIdCombo = new JComboBox<>();
         loadCars();
+        carIdCombo.addActionListener(this::fillFormFromSelectedCar);
 
-        carIdCombo.addActionListener((ActionEvent e) -> fillFormFromSelectedCar());
-
-        form.add(new JLabel("Select Car ID:"));
-        form.add(carIdCombo);
+        form.add(new JLabel("Select Car ID:")); form.add(carIdCombo);
         form.add(new JLabel("Brand:")); form.add(brandField);
         form.add(new JLabel("Model:")); form.add(modelField);
         form.add(new JLabel("Year:")); form.add(yearField);
@@ -65,6 +66,13 @@ public class UpdateCarGUI extends JFrame {
         form.add(new JLabel("Price per Day (€):")); form.add(priceField);
         form.add(new JLabel("Available Units:")); form.add(availableField);
 
+        imagePathField.setEditable(false);
+        JButton chooseImageButton = new JButton("Choose New Image");
+        chooseImageButton.addActionListener(e -> chooseImage());
+
+        form.add(new JLabel("Image Path:")); form.add(imagePathField);
+        form.add(new JLabel()); form.add(chooseImageButton);
+
         JButton updateBtn = new JButton("Update Car");
         updateBtn.addActionListener(e -> updateCarInDB());
 
@@ -73,7 +81,16 @@ public class UpdateCarGUI extends JFrame {
 
         setVisible(true);
         form.getRootPane().setDefaultButton(updateBtn);
+    }
 
+    private void chooseImage() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Choose New Car Image");
+        int result = chooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            selectedImageFile = chooser.getSelectedFile();
+            imagePathField.setText(selectedImageFile.getName());
+        }
     }
 
     private void loadCars() {
@@ -95,6 +112,7 @@ public class UpdateCarGUI extends JFrame {
                 car.setConsumption(rs.getFloat("consumption"));
                 car.setPrice(rs.getFloat("price"));
                 car.setAvailable(rs.getInt("available"));
+                car.setImgPath(rs.getString("image_path"));
 
                 carsMap.put(id, car);
                 carIdCombo.addItem(String.valueOf(id));
@@ -105,7 +123,7 @@ public class UpdateCarGUI extends JFrame {
         }
     }
 
-    private void fillFormFromSelectedCar() {
+    private void fillFormFromSelectedCar(ActionEvent e) {
         int id = Integer.parseInt((String) carIdCombo.getSelectedItem());
         Car car = carsMap.get(id);
 
@@ -119,13 +137,24 @@ public class UpdateCarGUI extends JFrame {
         consumptionField.setText(String.valueOf(car.getConsumption()));
         priceField.setText(String.valueOf(car.getPrice()));
         availableField.setText(String.valueOf(car.getAvailable()));
+        imagePathField.setText(car.getImgPath());
     }
 
     private void updateCarInDB() {
         int id = Integer.parseInt((String) carIdCombo.getSelectedItem());
 
         try (Connection conn = database.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement("UPDATE cars SET brand = ?, model = ?, year = ?, fuel = ?, gearbox = ?, enginecc = ?, horsepower = ?, consumption = ?, price = ?, available = ? WHERE ID = ?");
+            String imagePath = imagePathField.getText();
+
+            // If a new image was selected, overwrite the old one and update the path
+            if (selectedImageFile != null) {
+                imagePath = ImageUtil.saveImage(selectedImageFile, id); // returns e.g. "7.png"
+            }
+
+            PreparedStatement ps = conn.prepareStatement(
+                "UPDATE cars SET brand = ?, model = ?, year = ?, fuel = ?, gearbox = ?, enginecc = ?, " +
+                "horsepower = ?, consumption = ?, price = ?, available = ?, image_path = ? WHERE ID = ?"
+            );
             ps.setString(1, brandField.getText());
             ps.setString(2, modelField.getText());
             ps.setInt(3, Integer.parseInt(yearField.getText()));
@@ -136,18 +165,20 @@ public class UpdateCarGUI extends JFrame {
             ps.setFloat(8, Float.parseFloat(consumptionField.getText()));
             ps.setFloat(9, Float.parseFloat(priceField.getText()));
             ps.setInt(10, Integer.parseInt(availableField.getText()));
-            ps.setInt(11, id);
+            ps.setString(11, imagePath);
+            ps.setInt(12, id);
 
             int result = ps.executeUpdate();
             if (result > 0) {
                 JOptionPane.showMessageDialog(this, "Car updated successfully.");
+                dispose();
             } else {
                 JOptionPane.showMessageDialog(this, "Failed to update car.");
             }
-            dispose();
-        } catch (SQLException | NumberFormatException e) {
+
+        } catch (SQLException | IOException | NumberFormatException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Database: Error updating car.");
+            JOptionPane.showMessageDialog(this, "Error updating car.");
         }
     }
 }

@@ -9,10 +9,8 @@ package View;
  * @author nikwn
  */
 
-import Controller.*;
 import DatabaseConfig.Database;
 import Model.Client;
-import Model.Operation;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,13 +19,6 @@ public class ClientDashboard extends JFrame {
 
     private final Database database;
     private final Client client;
-
-    private final Operation[] operations = new Operation[]{
-            new ViewCars(),
-            new RentCar(),
-            new ReturnCar(),
-            new ShowUserRents()
-    };
 
     public ClientDashboard(Database db, Client clientUser) {
         this.database = db;
@@ -66,8 +57,8 @@ public class ClientDashboard extends JFrame {
 
         viewCars.addActionListener(e -> new ViewCarsGUI(new Database()));
         rentCar.addActionListener(e -> new RentCarGUI(new Database(), client));
-        //returnCar.addActionListener(e -> operations[2].operation(database, this, client));
-        //showRents.addActionListener(e -> operations[3].operation(database, this, client));
+        returnCar.addActionListener(e -> new ReturnCarGUI(new Database(), client));
+        showRents.addActionListener(e -> new ShowUserRentsGUI(new Database(), client));
 
         logout.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to logout?", "Logout", JOptionPane.YES_NO_OPTION);

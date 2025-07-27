@@ -7,6 +7,9 @@ import Model.Client;
 import Model.User;
 import Utils.SecurityUtil;
 import View.AddNewAccountGUI;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,7 +21,29 @@ public class CarRentalApp {
 
     public static void main(String[] args) {
         try {
+            FlatLaf.setUseNativeWindowDecorations(true);
             UIManager.setLookAndFeel(new FlatMacLightLaf());
+
+            // Now override colors
+            Color purple = new Color(0x9c84bc);
+
+            // Round components
+            UIManager.put("Button.arc", 20);
+            UIManager.put("Component.arc", 20);
+
+            // Focus and selection
+            UIManager.put("Component.focusColor", purple);
+            UIManager.put("Button.focusColor", new Color(0, 0, 0, 0));
+            UIManager.put("Button.default.focusColor", new Color(0, 0, 0, 0));
+
+            // Hover styling
+            UIManager.put("Button.hoverBackground", purple);
+            UIManager.put("Button.hoverForeground", Color.WHITE);
+
+            // Background for default buttons (like your login button)
+            UIManager.put("Button.default.background", purple);
+            UIManager.put("Button.default.foreground", Color.WHITE);
+            UIManager.put("Button.default.borderColor", purple);
         } catch (Exception e) {
             System.err.println("Failed to set FlatLaf macOS Light theme");
         }
