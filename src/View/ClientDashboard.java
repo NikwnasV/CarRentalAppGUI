@@ -43,14 +43,14 @@ public class ClientDashboard extends JFrame {
         JButton rentCar = new JButton("Rent Car");
         JButton returnCar = new JButton("Return Car");
         JButton showRents = new JButton("Show My Rents");
-        JButton editData = new JButton("Edit My Data (coming soon)");
+        //JButton editData = new JButton("Edit My Data (coming soon)");
         JButton logout = new JButton("Logout");
 
         menuPanel.add(viewCars);
         menuPanel.add(rentCar);
         menuPanel.add(returnCar);
         menuPanel.add(showRents);
-        menuPanel.add(editData);
+        //menuPanel.add(editData);
         menuPanel.add(logout);
 
         add(menuPanel, BorderLayout.CENTER);

@@ -7,16 +7,23 @@ package View;
 
 import DatabaseConfig.Database;
 import Model.Car;
-import Model.Client;
-import Model.Rent;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.sql.*;
-import java.util.HashMap;
-        
+import java.util.Vector;
+
+// Import FlatLaf themes
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
+
 /**
  *
  * @author nikwn
@@ -24,188 +31,255 @@ import java.util.HashMap;
 
 public class ViewCarsGUI extends JFrame {
     private final Database database;
-    //private final Client client;
-    private final JComboBox<String> carDropdown;
-    private final JTextField daysField;
     private final JLabel imageLabel;
-    private final JTextArea carDetailsArea;
-    private final HashMap<String, Car> carMap = new HashMap<>();
+    private final JTable carTable;
+    private final DefaultTableModel tableModel;
+
+    // Define the PURPLE color consistent with CarRentalApp
+    private static final Color PURPLE = new Color(0x9c84bc);
 
     public ViewCarsGUI(Database database) {
         this.database = database;
-        //this.client = client;
 
-        setTitle("Rent a Car");
-        setSize(800, 800);
+        // --- Apply global UI properties matching the CarRentalApp login theme ---
+        // These settings MUST be applied BEFORE setting the Look and Feel
+        UIManager.put("Button.arc", 20);
+        UIManager.put("Component.arc", 20);
+        UIManager.put("Component.focusColor", PURPLE);
+        UIManager.put("Button.focusColor", new Color(0, 0, 0, 0)); // No focus indication for buttons
+        UIManager.put("Button.default.focusColor", new Color(0, 0, 0, 0));
+        UIManager.put("Button.hoverBackground", PURPLE);
+        UIManager.put("Button.hoverForeground", Color.WHITE);
+        UIManager.put("Button.default.background", PURPLE); // Default buttons will be purple
+        UIManager.put("Button.default.foreground", Color.WHITE);
+        UIManager.put("Button.default.borderColor", PURPLE);
+
+        // --- Set the FlatLaf macOS Light theme ---
+        try {
+            UIManager.setLookAndFeel(new FlatMacLightLaf()); // Changed to FlatMacLightLaf
+            FlatLaf.setUseNativeWindowDecorations(true); // For consistent window decorations
+        } catch (Exception e) {
+            System.err.println("Failed to set FlatLaf macOS Light theme. Using fallback.");
+            try {
+                // Fallback to Nimbus if FlatLaf is not available or fails to load
+                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        UIManager.setLookAndFeel(info.getClassName());
+                        break;
+                    }
+                }
+            } catch (Exception ex) {
+                System.err.println("Could not set Nimbus Look and Feel: " + ex.getMessage());
+            }
+        }
+
+        setTitle("View All Cars");
+        setSize(1100, 800);
+        setMinimumSize(new Dimension(850, 600));
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-setLayout(new BorderLayout());
 
-// --- TOP: Big Image ---
-imageLabel = new JLabel();
-imageLabel.setPreferredSize(new Dimension(640, 360));
-imageLabel.setHorizontalAlignment(JLabel.CENTER);
-add(imageLabel, BorderLayout.NORTH);
+        // --- Main Content Panel with Generous Padding ---
+        JPanel mainPanel = new JPanel(new BorderLayout(25, 25));
+        mainPanel.setBorder(new EmptyBorder(20, 30, 30, 30));
+        add(mainPanel);
 
+        // --- 2. Split Pane for Image Preview and Table ---
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        splitPane.setResizeWeight(0.35);
+        splitPane.setDividerSize(10);
+        splitPane.setBorder(BorderFactory.createEmptyBorder());
 
-// --- CENTER: Car Info ---
-carDetailsArea = new JTextArea();
-carDetailsArea.setEditable(false);
-carDetailsArea.setFont(new Font("SansSerif", Font.PLAIN, 13));
-carDetailsArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-add(new JScrollPane(carDetailsArea), BorderLayout.CENTER);
+        // --- Top Component of Split Pane: Image Preview ---
+        JPanel imagePreviewPanel = new JPanel(new BorderLayout());
+        imagePreviewPanel.setBackground(Color.WHITE); // Explicit white background for panel
+        imagePreviewPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
+            new EmptyBorder(15, 15, 15, 15)
+        ));
+        
+        imageLabel = new JLabel();
+        imageLabel.setPreferredSize(new Dimension(600, 300));
+        imageLabel.setMinimumSize(new Dimension(300, 150));
+        imageLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 400));
+        imageLabel.setHorizontalAlignment(JLabel.CENTER);
+        imageLabel.setVerticalAlignment(JLabel.CENTER);
+        imageLabel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200), 1));
+        imageLabel.setBackground(new Color(240, 240, 240)); // Light grey background if no image
+        imageLabel.setOpaque(true);
+        imagePreviewPanel.add(imageLabel, BorderLayout.CENTER);
 
-// --- SOUTH: Dropdown + Days + Button ---
-JPanel bottomPanel = new JPanel();
-bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
-bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        splitPane.setTopComponent(imagePreviewPanel);
 
-// Row 1: Car Dropdown
-JPanel carRow = new JPanel(new BorderLayout(5, 5));
-carDropdown = new JComboBox<>();
-carDropdown.addActionListener(this::updateCarPreview);
-carRow.add(new JLabel("Select Car:"), BorderLayout.WEST);
-carRow.add(carDropdown, BorderLayout.CENTER);
-bottomPanel.add(carRow);
+        // --- Bottom Component of Split Pane: Car Table ---
+        JPanel tableContainerPanel = new JPanel(new BorderLayout());
+        tableContainerPanel.setBackground(Color.WHITE); // Explicit white background for panel
+        tableContainerPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
 
-// Row 2: Days input
-JPanel daysRow = new JPanel(new BorderLayout(5, 5));
-daysField = new JTextField();
-daysRow.add(new JLabel("Number of Days:"), BorderLayout.WEST);
-daysRow.add(daysField, BorderLayout.CENTER);
-bottomPanel.add(Box.createVerticalStrut(8));
-bottomPanel.add(daysRow);
-
-// Row 3: Rent button
-JButton rentButton = new JButton("Confirm Rent");
-//rentButton.addActionListener(this::handleRent);
-JPanel buttonRow = new JPanel();
-buttonRow.add(rentButton);
-bottomPanel.add(Box.createVerticalStrut(10));
-bottomPanel.add(buttonRow);
-
-add(bottomPanel, BorderLayout.SOUTH);
-
-
-        loadCars();
-        setVisible(true);
-    }
-
-    private void loadCars() {
-        try (Connection conn = database.getConnection();
-             PreparedStatement ps = conn.prepareStatement("SELECT * FROM cars WHERE 1");
-             ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                Car car = new Car();
-                car.setID(rs.getInt("ID"));
-                car.setBrand(rs.getString("Brand"));
-                car.setModel(rs.getString("Model"));
-                car.setYear(rs.getInt("Year"));
-                car.setFuel(rs.getString("Fuel"));
-                car.setGearbox(rs.getString("Gearbox"));
-                car.setEnginecc(rs.getInt("EngineCC"));
-                car.setHorsepower(rs.getInt("Horsepower"));
-                car.setConsumption(rs.getFloat("Consumption"));
-                car.setPrice(rs.getFloat("Price"));
-                car.setAvailable(rs.getInt("Available"));
-                car.setImgPath(rs.getString("image_path"));
-
-                String key = car.getID() + " - " + car.getBrand() + " " + car.getModel();
-                carDropdown.addItem(key);
-                carMap.put(key, car);
+        String[] columnNames = {"ID", "Brand", "Model", "Year", "Fuel", "Gearbox", "Engine CC", "HP", "Consumption", "Price/Day", "Available"};
+        tableModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
             }
-
-            if (carDropdown.getItemCount() > 0)
-                updateCarPreview(null);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Failed to load cars.");
-        }
-    }
-
-    private void updateCarPreview(ActionEvent e) {
-        String selectedKey = (String) carDropdown.getSelectedItem();
-        Car car = carMap.get(selectedKey);
-        if (car == null) return;
-
-        try {
-            URL imageURL = getClass().getClassLoader().getResource("resources/" + car.getImgPath());
-            if (imageURL != null) {
-                ImageIcon icon = new ImageIcon(imageURL);
-                Image scaled = icon.getImage().getScaledInstance(640, 360, Image.SCALE_SMOOTH);
-                imageLabel.setIcon(new ImageIcon(scaled));
-            } else {
-                imageLabel.setIcon(null);
-                System.err.println("Image not found: " + car.getImgPath());
+            @Override
+            public Class<?> getColumnClass(int column) {
+                switch (column) {
+                    case 0: case 3: case 6: case 7: case 10: return Integer.class;
+                    default: return String.class;
+                }
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        };
+        carTable = new JTable(tableModel);
+        carTable.setFillsViewportHeight(true);
+        carTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        carTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        carTable.setRowHeight(30);
+        carTable.setIntercellSpacing(new Dimension(0, 5));
+
+        JTableHeader tableHeader = carTable.getTableHeader();
+        tableHeader.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        tableHeader.setBackground(new Color(235, 235, 235)); // Light gray header
+        tableHeader.setForeground(new Color(70, 70, 70)); // Darker text for header
+        tableHeader.setReorderingAllowed(false);
+
+        carTable.setGridColor(new Color(230, 230, 230));
+        carTable.setShowVerticalLines(false);
+        carTable.setRowSelectionAllowed(true);
+        carTable.setColumnSelectionAllowed(false);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        carTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+        carTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+        carTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer);
+        carTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer);
+        carTable.getColumnModel().getColumn(10).setCellRenderer(centerRenderer);
+
+        carTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selectedRow = carTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    displayCarImage(selectedRow);
+                }
+            }
+        });
+
+        JScrollPane tableScrollPane = new JScrollPane(carTable);
+        tableScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        
+        tableContainerPanel.add(tableScrollPane, BorderLayout.CENTER);
+        splitPane.setBottomComponent(tableContainerPanel);
+
+        mainPanel.add(splitPane, BorderLayout.CENTER);
+
+        loadCarsIntoTable();
+        
+        if (tableModel.getRowCount() > 0) {
+            carTable.setRowSelectionInterval(0, 0);
+            displayCarImage(0);
+        } else {
             imageLabel.setIcon(null);
         }
 
-        carDetailsArea.setText(String.format(
-                "Brand: %s\nModel: %s\nYear: %d\nFuel: %s\nGearbox: %s\nEngine CC: %d\nHorsepower: %d\nConsumption: %.1f\nPrice/Day: %.2f€\nAvailable: %d",
-                car.getBrand(), car.getModel(), car.getYear(), car.getFuel(), car.getGearbox(),
-                car.getEnginecc(), car.getHorsepower(), car.getConsumption(), car.getPrice(), car.getAvailable()
-        ));
+        setVisible(true);
     }
 
-//    private void handleRent(ActionEvent e) {
-//        String selectedKey = (String) carDropdown.getSelectedItem();
-//        Car car = carMap.get(selectedKey);
-//
-//        if (car == null) {
-//            JOptionPane.showMessageDialog(this, "Invalid car selection.");
-//            return;
-//        }
-//
-//        int days;
-//        try {
-//            days = Integer.parseInt(daysField.getText().trim());
-//            if (days <= 0) throw new NumberFormatException();
-//        } catch (NumberFormatException ex) {
-//            JOptionPane.showMessageDialog(this, "Please enter a valid number of days.");
-//            return;
-//        }
-//
-//        float total = car.getPrice() * days;
-//
-//        int confirm = JOptionPane.showConfirmDialog(this,
-//                "Total Price: €" + total + "\nConfirm Rent?",
-//                "Confirm Rent", JOptionPane.YES_NO_OPTION);
-//
-//        if (confirm == JOptionPane.YES_OPTION) {
-//            try (Connection conn = database.getConnection()) {
-//                PreparedStatement countStmt = conn.prepareStatement("SELECT COUNT(*) AS count FROM rents");
-//                ResultSet rs = countStmt.executeQuery();
-//                int rentID = 1;
-//                if (rs.next()) rentID = rs.getInt("count") + 1;
-//
-//                Rent rent = new Rent();
-//                PreparedStatement insert = conn.prepareStatement(
-//                        "INSERT INTO rents (ID, client, car, dateTime, days, total, status) VALUES (?, ?, ?, ?, ?, ?, ?)"
-//                );
-//                insert.setInt(1, rentID);
-//                insert.setInt(2, client.getID());
-//                insert.setInt(3, car.getID());
-//                insert.setString(4, rent.getDateTime());
-//                insert.setInt(5, days);
-//                insert.setFloat(6, total);
-//                insert.setInt(7, 0);
-//                insert.executeUpdate();
-//
-//                PreparedStatement update = conn.prepareStatement("UPDATE cars SET available = available - 1 WHERE ID = ?");
-//                update.setInt(1, car.getID());
-//                update.executeUpdate();
-//
-//                JOptionPane.showMessageDialog(this, "Car rented successfully!");
-//                dispose();
-//            } catch (SQLException ex) {
-//                ex.printStackTrace();
-//                JOptionPane.showMessageDialog(this, "An error occurred during the rent process.");
-//            }
-//        }
-//    }
+    private void loadCarsIntoTable() {
+        tableModel.setRowCount(0);
+        try (Connection conn = database.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT * FROM cars ORDER BY Brand, Model, Year");
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Vector<Object> row = new Vector<>();
+                row.add(rs.getInt("ID"));
+                row.add(rs.getString("Brand"));
+                row.add(rs.getString("Model"));
+                row.add(rs.getInt("Year"));
+                row.add(rs.getString("Fuel"));
+                row.add(rs.getString("Gearbox"));
+                row.add(rs.getInt("EngineCC"));
+                row.add(rs.getInt("Horsepower"));
+                row.add(String.format("%.1f L/100km", rs.getFloat("Consumption")));
+                row.add(String.format("%.2f €", rs.getFloat("Price")));
+                if(rs.getInt("Available") == 1){
+                    row.add("Available");
+                }else{
+                    row.add("Not Available");
+                }
+                tableModel.addRow(row);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Failed to load cars into table.", "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void displayCarImage(int row) {
+        if (row < 0 || row >= tableModel.getRowCount()) {
+            imageLabel.setIcon(null);
+            return;
+        }
+
+        int carId = (int) tableModel.getValueAt(row, 0); 
+        String imagePath = null;
+        try (Connection conn = database.getConnection();
+             PreparedStatement ps = conn.prepareStatement("SELECT image_path FROM cars WHERE ID = ?")) {
+            ps.setInt(1, carId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                imagePath = rs.getString("image_path");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error fetching image path for car ID: " + carId);
+        }
+
+        if (imagePath != null && !imagePath.isEmpty()) {
+            try {
+                URL imageURL = getClass().getClassLoader().getResource("resources/" + imagePath);
+                if (imageURL != null) {
+                    ImageIcon icon = new ImageIcon(imageURL);
+                    Image img = icon.getImage();
+                    
+                    int labelWidth = imageLabel.getWidth() > 0 ? imageLabel.getWidth() : imageLabel.getPreferredSize().width;
+                    int labelHeight = imageLabel.getHeight() > 0 ? imageLabel.getHeight() : imageLabel.getPreferredSize().height;
+                    
+                    double imgRatio = (double) img.getWidth(null) / img.getHeight(null);
+                    double labelRatio = (double) labelWidth / labelHeight;
+                    
+                    int newWidth, newHeight;
+                    if (imgRatio > labelRatio) {
+                        newWidth = labelWidth;
+                        newHeight = (int) (labelWidth / imgRatio);
+                    } else {
+                        newHeight = labelHeight;
+                        newWidth = (int) (labelHeight * imgRatio);
+                    }
+                    
+                    if (newWidth > labelWidth) newWidth = labelWidth;
+                    if (newHeight > labelHeight) newHeight = labelHeight;
+
+                    Image scaled = img.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+                    imageLabel.setIcon(new ImageIcon(scaled));
+                } else {
+                    imageLabel.setIcon(null);
+                    System.err.println("Image not found at path: resources/" + imagePath);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                imageLabel.setIcon(null);
+                System.err.println("Error loading image for path: " + imagePath);
+            }
+        } else {
+            imageLabel.setIcon(null); 
+            System.out.println("No image path found or path is empty for car ID: " + carId);
+        }
+    }
 }
